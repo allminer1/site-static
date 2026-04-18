@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>CSA-AKI Risk Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --blue-dark: #f0f6ff;
+      --blue-mid: #e3edf9;
+      --blue-card: #112240;
+      --blue-accent: #1a6bcc;
+      --blue-light: #2196f3;
+      --blue-glow: #1976d2;
+      --teal: #00838f;
+      --teal-soft: #00acc1;
+      --green: #00c853;
+      --yellow: #f9a825;
+      --red: #d32f2f;
+      --text-main: #0d1f35;
+      --text-muted: #476585;
+      --text-dim: #7a9bbf;
+      --border: rgba(30,90,160,0.13);
+      --border-glow: rgba(33,150,243,0.25);
+      --card-bg: rgba(255,255,255,0.92);
+      --input-bg: rgba(240,246,255,0.9);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f0f6ff;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(26,107,204,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(0,188,212,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(25,118,210,0.04) 0%, transparent 70%),
+        linear-gradient(135deg, #ddeeff 0%, #f0f6ff 40%, #e8f4fd 100%);
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(33,150,243,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(33,150,243,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* Floating ECG line */
+    .ecg-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 0;
+      opacity: 0.18;
+      overflow: hidden;
+    }
+    .ecg-bar svg {
+      width: 200%;
+      height: 100%;
+      animation: ecgScroll 6s linear infinite;
+    }
+    @keyframes ecgScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(26,107,204,0.15);
+    }
+
+    .header-left {}
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .heart-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1a6bcc, #00bcd4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(26,107,204,0.5);
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1565c0, #006064);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .app-subtitle {
+      font-size: 0.82rem;
+      color: #476585;
+      line-height: 1.4;
+      max-width: 480px;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .badge-medical {
+      background: linear-gradient(135deg, rgba(26,107,204,0.3), rgba(0,188,212,0.2));
+      border: 1px solid rgba(33,150,243,0.4);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1565c0;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .lang-switcher {
+      display: flex;
+      gap: 4px;
+      background: rgba(21,101,192,0.06);
+      border: 1px solid var(--border);
+      padding: 3px;
+      border-radius: 10px;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      letter-spacing: 0.03em;
+    }
+    .lang-btn.active {
+      background: linear-gradient(135deg, #1a6bcc, #0d47a1);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(26,107,204,0.5);
+    }
+    .lang-btn:hover:not(.active) {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Card */
+    .card {
+      background: #ffffff;
+      border: 1px solid rgba(26,107,204,0.13);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 24px rgba(26,107,204,0.07);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(21,101,192,0.25), transparent);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(26,107,204,0.15);
+    }
+
+    .card-icon {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .icon-blue { background: rgba(33,150,243,0.2); border: 1px solid rgba(33,150,243,0.3); }
+    .icon-teal { background: rgba(0,188,212,0.2); border: 1px solid rgba(0,188,212,0.3); }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1565c0;
+      letter-spacing: 0.01em;
+    }
+
+    /* Form fields */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .field-label-name { color: #1a3a5c; }
+    .field-unit {
+      font-size: 0.62rem;
+      color: #7a9bbf;
+      font-weight: 400;
+    }
+
+    .field-input-wrap {
+      position: relative;
+    }
+
+    .field-threshold {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.6rem;
+      color: #7a9bbf;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      background: #f5f9ff;
+      border: 1px solid rgba(26,107,204,0.2);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      -webkit-appearance: none;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: rgba(33,150,243,0.6);
+      box-shadow: 0 0 0 2px rgba(33,150,243,0.12), inset 0 0 0 1px rgba(33,150,243,0.08);
+    }
+
+    input[type="number"]::placeholder { color: #9ab8d4; }
+
+    select option {
+      background: #f5f9ff;
+      color: var(--text-main);
+    }
+
+    /* Score badge on input when active */
+    input.has-score {
+      border-color: rgba(33,150,243,0.4);
+      box-shadow: 0 0 0 2px rgba(33,150,243,0.08);
+    }
+
+    .helper-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.65rem;
+      color: #7a9bbf;
+    }
+    .helper-dot { width: 5px; height: 5px; border-radius: 50%; background: #1a6bcc; flex-shrink: 0; }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-calc {
+      flex: 1;
+      padding: 11px 20px;
+      background: linear-gradient(135deg, #1a6bcc 0%, #0d47a1 100%);
+      border: none;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(26,107,204,0.4);
+      transition: transform 0.08s ease, box-shadow 0.1s ease;
+      letter-spacing: 0.02em;
+    }
+    .btn-calc:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(26,107,204,0.5); }
+    .btn-calc:active { transform: translateY(0); }
+
+    .btn-reset {
+      padding: 11px 16px;
+      background: rgba(21,101,192,0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .btn-reset:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+
+    /* Error */
+    .error-msg {
+      font-size: 0.72rem;
+      color: #ff8080;
+      margin-top: 8px;
+      display: none;
+      padding: 6px 10px;
+      background: rgba(255,82,82,0.08);
+      border-radius: 6px;
+      border-left: 2px solid #ff5252;
+    }
+
+    /* Cutoff reference */
+    .cutoff-box {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: rgba(21,101,192,0.04);
+      border: 1px solid rgba(21,101,192,0.14);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      color: #7a9bbf;
+      line-height: 1.5;
+    }
+
+    /* Results panel */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Score display */
+    .score-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f0f6ff;
+      border: 1px solid rgba(26,107,204,0.18);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .score-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .score-number {
+      font-size: 2.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1565c0, #006064);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      min-width: 48px;
+      text-align: right;
+    }
+    .score-number.is-dash {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #b0c8e8, #c9ddf4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Risk banner */
+    .risk-banner {
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+    .risk-banner.risk-none {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+    }
+    .risk-banner.risk-low {
+      background: rgba(0,230,118,0.07);
+      border: 1px solid rgba(0,230,118,0.25);
+    }
+    .risk-banner.risk-moderate {
+      background: rgba(255,215,64,0.07);
+      border: 1px solid rgba(255,215,64,0.25);
+    }
+    .risk-banner.risk-high {
+      background: rgba(255,82,82,0.08);
+      border: 1px solid rgba(255,82,82,0.3);
+      box-shadow: 0 0 20px rgba(255,82,82,0.08);
+    }
+
+    .risk-icon {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+    }
+
+    .risk-text-block {}
+    .risk-pill-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .risk-low .risk-pill-label { color: #69f0ae; }
+    .risk-moderate .risk-pill-label { color: #ffd740; }
+    .risk-high .risk-pill-label { color: #ff8a80; }
+    .risk-none .risk-pill-label { color: var(--text-dim); }
+
+    .risk-description {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Recs list */
+    .recs-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .rec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f5f9ff;
+      border: 1px solid rgba(26,107,204,0.12);
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #1a3a5c;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .rec-icon { flex-shrink: 0; font-size: 0.85rem; margin-top: 0px; }
+
+    /* Legend */
+    .legend-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: #f8fbff;
+      border: 1px solid rgba(26,107,204,0.12);
+    }
+    .legend-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      min-width: 58px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .lb-low { background: rgba(0,230,118,0.15); color: #69f0ae; border: 1px solid rgba(0,230,118,0.3); }
+    .lb-moderate { background: rgba(255,215,64,0.15); color: #ffd740; border: 1px solid rgba(255,215,64,0.3); }
+    .lb-high { background: rgba(255,82,82,0.15); color: #ff8a80; border: 1px solid rgba(255,82,82,0.3); }
+    .legend-desc { font-size: 0.72rem; color: #476585; }
+
+    /* Score breakdown */
+    .breakdown-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+    }
+    .breakdown-item.active {
+      background: rgba(21,101,192,0.07);
+      border: 1px solid rgba(21,101,192,0.2);
+    }
+    .breakdown-item.inactive {
+      opacity: 0.35;
+    }
+    .breakdown-name { color: #1a3a5c; }
+    .breakdown-pts {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .pts-active { color: #64b5f6; }
+    .pts-inactive { color: #b0c8d8; }
+
+    footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(26,107,204,0.13);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.67rem;
+      color: #7a9bbf;
+    }
+
+    @media (max-width: 480px) {
+      .fields-grid { grid-template-columns: 1fr; }
+      .score-number { font-size: 1.8rem; }
+      .app-title { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+
+<!-- ECG decorative line -->
+<div class="ecg-bar">
+  <svg viewBox="0 0 800 60" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline stroke="#2196f3" stroke-width="1.5"
+      points="0,30 80,30 100,30 110,5 120,55 130,10 140,30 200,30 280,30 300,30 310,5 320,55 330,10 340,30 400,30 480,30 500,30 510,5 520,55 530,10 540,30 600,30 680,30 700,30 710,5 720,55 730,10 740,30 800,30"/>
+    <polyline stroke="#00bcd4" stroke-width="0.8" opacity="0.5"
+      points="0,35 40,35 50,20 60,50 70,25 80,35 160,35 200,35 210,20 220,50 230,25 240,35 320,35 360,35 370,20 380,50 390,25 400,35 480,35 520,35 530,20 540,50 550,25 560,35 640,35 680,35 690,20 700,50 710,25 720,35 800,35"/>
+  </svg>
+</div>
+
+<div class="wrapper">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-row">
+        <div class="heart-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div class="app-title" id="appTitle">Шкала стратификации риска CSA-AKI</div>
+      </div>
+      <div class="app-subtitle" id="appSubtitle">Мультимаркерный калькулятор риска ОПП у детей после коррекции врождённых пороков сердца</div>
+    </div>
+    <div class="header-right">
+      <div class="badge-medical" id="appBadge">CSA-AKI risk score</div>
+      <div class="lang-switcher">
+        <button type="button" class="lang-btn active" data-lang="ru">RU</button>
+        <button type="button" class="lang-btn" data-lang="kk">KZ</button>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </div>
+    
+    
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="card-title" id="inputSectionTitle">Входные параметры</div>
+      </div>
+
+      <div class="fields-grid">
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelFerritinName">Ферритин</span>
+            <span class="field-unit" id="labelFerritinUnit">ng/mL</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="ferritin" min="0" max="5000" step="1" placeholder="e.g. 180">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperFerritin">≥150 ng/mL → +2</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelSuaName">Мочевая кислота</span>
+            <span class="field-unit" id="labelSuaUnit">µmol/L</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="sua" min="0" max="1500" step="1" placeholder="e.g. 520">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperSua">≥500 µmol/L → +1</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelCpbName">Длительность ИК</span>
+            <span class="field-unit" id="labelCpbUnit">мин</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="cpb" min="0" max="300" step="1" placeholder="e.g. 95">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperCpb">&gt;90 мин → +1</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelVisName">VIS-score</span>
+            <span class="field-unit" id="labelVisUnit">балл</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="vis" min="0" max="100" step="1" placeholder="e.g. 22">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperVis">&gt;20 → +1</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelLcosName">LCOS</span>
+            <span class="field-unit" id="labelLcosUnit">да/нет</span>
+          </div>
+          <select id="lcos">
+            <option value="no" id="lcosNoOption">Нет</option>
+            <option value="yes" id="lcosYesOption">Да</option>
+          </select>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperLcos">LCOS → +1</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="field-label-name" id="labelFluidName">Водный баланс</span>
+            <span class="field-unit" id="labelFluidUnit">% масс.</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="fluid" min="-20" max="100" step="0.1" placeholder="e.g. 12">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperFluid">&gt;10% → +1</span></div>
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="field-label">
+            <span class="field-label-name" id="labelNaName">Натрий (Na)</span>
+            <span class="field-unit" id="labelNaUnit">mmol/L</span>
+          </div>
+          <div class="field-input-wrap">
+            <input type="number" id="na" min="100" max="180" step="1" placeholder="e.g. 128">
+          </div>
+          <div class="helper-row"><span class="helper-dot"></span><span id="helperNa">&lt;130 mmol/L → +1</span></div>
+        </div>
+      </div>
+
+      <div id="error" class="error-msg">Пожалуйста, заполните все числовые поля перед расчётом.</div>
+
+      <div class="actions">
+        <button id="calcBtn" type="button" class="btn-calc">
+          <span id="calcBtnText">⚡ Рассчитать риск</span>
+        </button>
+        <button id="resetBtn" type="button" class="btn-reset">
+          <span id="resetBtnText">↺ Сброс</span>
+        </button>
+      </div>
+
+      <div class="cutoff-box" id="cutoffInfo">
+        Пороговые значения: ферритин ≥150 ng/mL · SUA ≥500 µmol/L · ИК &gt;90 мин · VIS &gt;20 · водный баланс &gt;10% · Na &lt;130 mmol/L
+      </div>
+    </div>
+
+    <!-- Results card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00838f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <div class="card-title" id="resultSectionTitle">Результат стратификации риска</div>
+      </div>
+
+      <div class="results-panel">
+        <!-- Score -->
+        <div class="score-display">
+          <div>
+            <div class="score-label" id="scoreLineLabel">Суммарный балл</div>
+            <div style="font-size:0.68rem; color: var(--text-dim); margin-top: 2px;" id="scoreMax">из 8 возможных</div>
+          </div>
+          <div class="score-number is-dash" id="scoreValue">–</div>
+        </div>
+
+        <!-- Risk banner -->
+        <div class="risk-banner risk-none" id="riskBanner">
+          <div class="risk-icon" id="riskIcon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7a9bbf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg></div>
+          <div class="risk-text-block">
+            <div class="risk-pill-label" id="riskCategoryLabel">Ожидание</div>
+            <div class="risk-description" id="riskCategory">Введите параметры и нажмите «Рассчитать риск».</div>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div>
+          <div class="recs-title" id="clinicalTitle">Клиническая тактика</div>
+          <div id="recommendations">
+            <div class="rec-item"><span id="defaultRec1">Низкий риск (0–2): стандартное наблюдение, контроль креатинина.</span></div>
+            <div class="rec-item"><span id="defaultRec2">Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных.</span></div>
+            <div class="rec-item"><span id="defaultRec3">Высокий риск (≥6): интенсивный мониторинг, коррекция гемодинамики, ЗПТ.</span></div>
+          </div>
+        </div>
+
+        <!-- Score breakdown (hidden until calculated) -->
+        <div id="breakdownSection" style="display:none;">
+          <div class="recs-title" id="breakdownTitle">Разбивка по баллам</div>
+          <div class="breakdown-grid" id="breakdownGrid"></div>
+        </div>
+
+        <!-- Legend -->
+        <div>
+          <div class="recs-title" id="legendTitle">Категории риска</div>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-badge lb-low" id="legendLowBadge">0–2 балла</span>
+              <span class="legend-desc" id="legendLowText">Низкий риск. Стандартное послеоперационное наблюдение.</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge lb-moderate" id="legendModerateBadge">3–5 баллов</span>
+              <span class="legend-desc" id="legendModerateText">Умеренный риск. Мониторинг диуреза, нефропротекция.</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge lb-high" id="legendHighBadge">≥6 баллов</span>
+              <span class="legend-desc" id="legendHighText">Высокий риск. Агрессивные меры, ранняя ЗПТ.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span id="footerLeft">Разработано на основе мультимаркерной модели CSA-AKI у детей после кардиохирургических вмешательств.</span>
+    <span id="footerRight">Работает офлайн · Nur for clinical use</span>
+  </footer>
+</div>
+
+<script>
+var i18n = {
+  ru: {
+    appTitle: 'Шкала стратификации риска CSA-AKI',
+    appSubtitle: 'Мультимаркерный калькулятор риска ОПП у детей после коррекции врождённых пороков сердца',
+    appBadge: 'CSA-AKI risk score',
+    statLabel1: 'Пациентов в исследовании',
+    statLabel2: 'Параметров шкалы',
+    statLabel3: 'Максимальный балл',
+    inputSectionTitle: 'Входные параметры',
+    resultSectionTitle: 'Результат стратификации риска',
+    ferritinName: 'Ферритин', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
+    suaName: 'Мочевая кислота', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
+    cpbName: 'Длительность ИК', cpbUnit: 'мин', helperCpb: '>90 мин → +1',
+    visName: 'VIS-score', visUnit: 'балл', helperVis: '>20 → +1',
+    lcosName: 'LCOS', lcosUnit: 'да/нет', lcosNo: 'Нет', lcosYes: 'Да', helperLcos: 'LCOS → +1',
+    fluidName: 'Водный баланс', fluidUnit: '% масс.', helperFluid: '>10% → +1',
+    naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
+    errorFillAll: 'Пожалуйста, заполните все числовые поля перед расчётом.',
+    calcBtnText: '⚡ Рассчитать риск', resetBtnText: '↺ Сброс',
+    cutoffInfo: 'Пороговые значения: ферритин ≥150 ng/mL · SUA ≥500 µmol/L · ИК >90 мин · VIS >20 · водный баланс >10% · Na <130 mmol/L',
+    scoreLineLabel: 'Суммарный балл', scoreMax: 'из 8 возможных',
+    riskIntro: 'Введите параметры и нажмите «Рассчитать риск».',
+    waitingLabel: 'Ожидание',
+    clinicalTitle: 'Клиническая тактика', breakdownTitle: 'Разбивка по баллам',
+    defaultRec1: 'Низкий риск (0–2): стандартное наблюдение, контроль креатинина.',
+    defaultRec2: 'Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных.',
+    defaultRec3: 'Высокий риск (≥6): интенсивный мониторинг, коррекция гемодинамики, ЗПТ.',
+    legendTitle: 'Категории риска',
+    legendLowBadge: '0–2 балла', legendLowText: 'Низкий риск. Стандартное послеоперационное наблюдение.',
+    legendModerateBadge: '3–5 баллов', legendModerateText: 'Умеренный риск. Мониторинг диуреза, нефропротекция.',
+    legendHighBadge: '≥6 баллов', legendHighText: 'Высокий риск. Агрессивные меры, ранняя ЗПТ.',
+    footerLeft: 'Разработано на основе мультимаркерной модели CSA-AKI у детей после кардиохирургических вмешательств.',
+    footerRight: 'Работает офлайн',
+    riskLowLabel: '● Низкий риск', riskModerateLabel: '● Умеренный риск', riskHighLabel: '● Высокий риск',
+    riskLowIcon: 'low', riskModerateIcon: 'moderate', riskHighIcon: 'high',
+    riskLowDescription: 'Группа низкого риска (0–2 балла). Стандартное наблюдение, контроль функции почек.',
+    riskModerateDescription: 'Группа умеренного риска (3–5 баллов). Усиленный мониторинг, нефропротекция.',
+    riskHighDescription: 'Группа высокого риска (≥6 баллов). Интенсивный мониторинг, ранняя коррекция гемодинамики, рассмотреть ЗПТ.',
+    recLow: ['Стандартное послеоперационное наблюдение.', 'Контроль сывороточного креатинина и диуреза.'],
+    recModerate: ['Усиленный мониторинг диуреза и функции почек.', 'Ограничение нефротоксичных препаратов.', 'Оптимизация гемодинамики и водного баланса.'],
+    recHigh: ['Интенсивный мониторинг функции почек (диурез, креатинин, жидкость).', 'Ранняя коррекция гемодинамики и гипоперфузии.', 'Рассмотреть раннюю ЗПТ (перитонеальный диализ).'],
+    breakdownNames: ['Ферритин ≥150', 'Мочевая кислота ≥500', 'ИК >90 мин', 'VIS >20', 'LCOS', 'Водный баланс >10%', 'Na <130'],
+    breakdownPts: [2, 1, 1, 1, 1, 1, 1]
+  },
+  en: {
+    appTitle: 'CSA-AKI Risk Stratification Score',
+    appSubtitle: 'Multimarker calculator of postoperative AKI risk in children after congenital heart defect correction',
+    appBadge: 'CSA-AKI risk score',
+    statLabel1: 'Patients in study',
+    statLabel2: 'Scale parameters',
+    statLabel3: 'Maximum score',
+    inputSectionTitle: 'Input parameters',
+    resultSectionTitle: 'Risk stratification result',
+    ferritinName: 'Ferritin', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
+    suaName: 'Serum uric acid', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
+    cpbName: 'CPB duration', cpbUnit: 'min', helperCpb: '>90 min → +1',
+    visName: 'VIS-score', visUnit: 'score', helperVis: '>20 → +1',
+    lcosName: 'LCOS', lcosUnit: 'yes/no', lcosNo: 'No', lcosYes: 'Yes', helperLcos: 'LCOS → +1',
+    fluidName: 'Fluid balance', fluidUnit: '% BW', helperFluid: '>10% → +1',
+    naName: 'Sodium (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
+    errorFillAll: 'Please fill in all numeric fields before calculating.',
+    calcBtnText: '⚡ Calculate risk', resetBtnText: '↺ Reset',
+    cutoffInfo: 'Cut-offs: ferritin ≥150 ng/mL · SUA ≥500 µmol/L · CPB >90 min · VIS >20 · fluid balance >10% BW · Na <130 mmol/L',
+    scoreLineLabel: 'Total score', scoreMax: 'out of 8 possible',
+    riskIntro: 'Enter parameters and press "Calculate risk".',
+    waitingLabel: 'Waiting',
+    clinicalTitle: 'Clinical management', breakdownTitle: 'Score breakdown',
+    defaultRec1: 'Low risk (0–2): standard monitoring, creatinine follow-up.',
+    defaultRec2: 'Moderate risk (3–5): closer urine output monitoring, limit nephrotoxic drugs.',
+    defaultRec3: 'High risk (≥6): intensive monitoring, hemodynamic correction, consider RRT.',
+    legendTitle: 'Risk categories',
+    legendLowBadge: '0–2 points', legendLowText: 'Low risk. Standard postoperative monitoring.',
+    legendModerateBadge: '3–5 points', legendModerateText: 'Moderate risk. Closer monitoring, nephroprotection.',
+    legendHighBadge: '≥6 points', legendHighText: 'High risk. Aggressive measures, early RRT.',
+    footerLeft: 'Developed from a multimarker model of CSA-AKI in children after cardiac surgery.',
+    footerRight: 'Works offline',
+    riskLowLabel: '● Low risk', riskModerateLabel: '● Moderate risk', riskHighLabel: '● High risk',
+    riskLowIcon: 'low', riskModerateIcon: 'moderate', riskHighIcon: 'high',
+    riskLowDescription: 'Low risk group (0–2 points). Standard monitoring and routine kidney function assessment.',
+    riskModerateDescription: 'Moderate risk group (3–5 points). Closer monitoring, restriction of nephrotoxic drugs.',
+    riskHighDescription: 'High risk group (≥6 points). Intensive monitoring, early hemodynamic correction, consider RRT.',
+    recLow: ['Standard postoperative monitoring.', 'Regular serum creatinine and urine output follow-up.'],
+    recModerate: ['Closer urine output and kidney function monitoring.', 'Restrict nephrotoxic medications.', 'Optimise hemodynamics and fluid balance.'],
+    recHigh: ['Intensive kidney function monitoring (urine output, creatinine, fluid).', 'Early hemodynamic correction and prevention of organ hypoperfusion.', 'Consider early RRT (e.g. peritoneal dialysis).'],
+    breakdownNames: ['Ferritin ≥150', 'SUA ≥500', 'CPB >90 min', 'VIS >20', 'LCOS', 'Fluid balance >10%', 'Na <130'],
+    breakdownPts: [2, 1, 1, 1, 1, 1, 1]
+  },
+  kk: {
+    appTitle: 'Балалардағы CSA-AKI тәуекел стратификациясы',
+    appSubtitle: 'ТБЖ түзетуден кейінгі ОПП тәуекелінің көпмаркерлі калькуляторы',
+    appBadge: 'CSA-AKI тәуекел скорингі',
+    statLabel1: 'Зерттеудегі науқастар',
+    statLabel2: 'Шкала параметрлері',
+    statLabel3: 'Максималды балл',
+    inputSectionTitle: 'Енгізу параметрлері',
+    resultSectionTitle: 'Тәуекел стратификациясының нәтижесі',
+    ferritinName: 'Ферритин', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
+    suaName: 'Зәр қышқылы', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
+    cpbName: 'ЖҚ ұзақтығы', cpbUnit: 'мин', helperCpb: '>90 мин → +1',
+    visName: 'VIS-score', visUnit: 'балл', helperVis: '>20 → +1',
+    lcosName: 'LCOS', lcosUnit: 'иә/жоқ', lcosNo: 'Жоқ', lcosYes: 'Иә', helperLcos: 'LCOS → +1',
+    fluidName: 'Сұйықтық балансы', fluidUnit: '% салмақ', helperFluid: '>10% → +1',
+    naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
+    errorFillAll: 'Есептеу алдында барлық сандық өрістерді толтырыңыз.',
+    calcBtnText: '⚡ Қауіпті есептеу', resetBtnText: '↺ Тазалау',
+    cutoffInfo: 'Порогтық мәндер: ферритин ≥150 ng/mL · зәр қышқылы ≥500 µmol/L · ЖҚ >90 мин · VIS >20 · сұйықтық балансы >10% · Na <130 mmol/L',
+    scoreLineLabel: 'Жалпы балл', scoreMax: '8 мүмкіннің ішінен',
+    riskIntro: 'Параметрлерді енгізіп, «Қауіпті есептеу» батырмасын басыңыз.',
+    waitingLabel: 'Күту',
+    clinicalTitle: 'Клиникалық тактика', breakdownTitle: 'Балл бөлінісі',
+    defaultRec1: 'Төмен қауіп (0–2): стандартты бақылау, креатинин.',
+    defaultRec2: 'Орташа қауіп (3–5): диурез мониторингі, нефротоксикалық шектеу.',
+    defaultRec3: 'Жоғары қауіп (≥6): интенсивті мониторинг, гемодинамика, ЗАБ.',
+    legendTitle: 'Тәуекел санаттары',
+    legendLowBadge: '0–2 балл', legendLowText: 'Төмен тәуекел. Стандартты операциядан кейінгі бақылау.',
+    legendModerateBadge: '3–5 балл', legendModerateText: 'Орташа тәуекел. Мониторинг, нефропротекция.',
+    legendHighBadge: '≥6 балл', legendHighText: 'Жоғары тәуекел. Агрессивті шаралар, ерте ЗАБ.',
+    footerLeft: 'Калькулятор балалардағы кардиохирургиялық операциядан кейінгі CSA-AKI моделіне негізделген.',
+    footerRight: 'Офлайн жұмыс істейді',
+    riskLowLabel: '● Төмен тәуекел', riskModerateLabel: '● Орташа тәуекел', riskHighLabel: '● Жоғары тәуекел',
+    riskLowIcon: 'low', riskModerateIcon: 'moderate', riskHighIcon: 'high',
+    riskLowDescription: 'Төмен тәуекел тобы (0–2 балл). Стандартты бақылау жеткілікті.',
+    riskModerateDescription: 'Орташа тәуекел тобы (3–5 балл). Күшейтілген мониторинг, нефропротекция.',
+    riskHighDescription: 'Жоғары тәуекел тобы (≥6 балл). Интенсивті мониторинг, гемодинамиканы ерте коррекциялау, ЗАБ қарастыру.',
+    recLow: ['Стандартты операциядан кейінгі бақылау.', 'Зертханалық бүйрек функциясын тексеру.'],
+    recModerate: ['Диурезді күшейтілген бақылау.', 'Нефротоксикалық дәрілерді шектеу.', 'Гемодинамика мен сұйықтық балансын оңтайландыру.'],
+    recHigh: ['Бүйрек функциясын интенсивті бақылау.', 'Гемодинамиканы ерте коррекциялау.', 'Ерте ЗАБ (перитонеальды диализ) мүмкіндігін қарастыру.'],
+    breakdownNames: ['Ферритин ≥150', 'Зәр қышқылы ≥500', 'ЖҚ >90 мин', 'VIS >20', 'LCOS', 'Сұйықтық >10%', 'Na <130'],
+    breakdownPts: [2, 1, 1, 1, 1, 1, 1]
+  }
+};
+
+var currentLang = 'ru';
+
+function applyLanguage(lang) {
+  var t = i18n[lang] || i18n['ru'];
+  currentLang = lang;
+  var ids = {
+    appTitle: 'appTitle', appSubtitle: 'appSubtitle', appBadge: 'appBadge',
+    statLabel1: 'statLabel1', statLabel2: 'statLabel2', statLabel3: 'statLabel3',
+    inputSectionTitle: 'inputSectionTitle', resultSectionTitle: 'resultSectionTitle',
+    ferritinName: 'labelFerritinName', ferritinUnit: 'labelFerritinUnit', helperFerritin: 'helperFerritin',
+    suaName: 'labelSuaName', suaUnit: 'labelSuaUnit', helperSua: 'helperSua',
+    cpbName: 'labelCpbName', cpbUnit: 'labelCpbUnit', helperCpb: 'helperCpb',
+    visName: 'labelVisName', visUnit: 'labelVisUnit', helperVis: 'helperVis',
+    lcosName: 'labelLcosName', lcosUnit: 'labelLcosUnit', helperLcos: 'helperLcos',
+    fluidName: 'labelFluidName', fluidUnit: 'labelFluidUnit', helperFluid: 'helperFluid',
+    naName: 'labelNaName', naUnit: 'labelNaUnit', helperNa: 'helperNa',
+    calcBtnText: 'calcBtnText', resetBtnText: 'resetBtnText',
+    cutoffInfo: 'cutoffInfo', scoreLineLabel: 'scoreLineLabel', scoreMax: 'scoreMax',
+    clinicalTitle: 'clinicalTitle', breakdownTitle: 'breakdownTitle',
+    defaultRec1: 'defaultRec1', defaultRec2: 'defaultRec2', defaultRec3: 'defaultRec3',
+    legendTitle: 'legendTitle',
+    legendLowBadge: 'legendLowBadge', legendLowText: 'legendLowText',
+    legendModerateBadge: 'legendModerateBadge', legendModerateText: 'legendModerateText',
+    legendHighBadge: 'legendHighBadge', legendHighText: 'legendHighText',
+    footerLeft: 'footerLeft', footerRight: 'footerRight',
+    lcosNo: 'lcosNoOption', lcosYes: 'lcosYesOption'
+  };
+  Object.keys(ids).forEach(function(key) {
+    var el = document.getElementById(ids[key]);
+    if (el && t[key] !== undefined) el.textContent = t[key];
+  });
+  if (document.getElementById('scoreValue').textContent === '–') {
+    document.getElementById('riskCategory').textContent = t.riskIntro;
+    document.getElementById('riskCategoryLabel').textContent = t.waitingLabel;
+  }
+}
+
+function parseValue(id) {
+  var el = document.getElementById(id);
+  if (!el) return null;
+  var raw = el.value.trim();
+  if (raw === '') return null;
+  var num = Number(raw.replace(',', '.'));
+  return Number.isFinite(num) ? num : null;
+}
+
+function calculateScore() {
+  var ferritin = parseValue('ferritin');
+  var sua = parseValue('sua');
+  var cpb = parseValue('cpb');
+  var vis = parseValue('vis');
+  var fluid = parseValue('fluid');
+  var na = parseValue('na');
+  var lcos = (document.getElementById('lcos') || {}).value || 'no';
+  var errorEl = document.getElementById('error');
+  errorEl.style.display = 'none';
+
+  if ([ferritin, sua, cpb, vis, fluid, na].some(function(v){ return v === null; })) {
+    errorEl.textContent = i18n[currentLang].errorFillAll;
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  var checks = [ferritin >= 150, sua >= 500, cpb > 90, vis > 20, lcos === 'yes', fluid > 10, na < 130];
+  var pts = [2, 1, 1, 1, 1, 1, 1];
+  var score = 0;
+  checks.forEach(function(c, i){ if (c) score += pts[i]; });
+
+  var t = i18n[currentLang];
+  var level = score <= 2 ? 'low' : (score <= 5 ? 'moderate' : 'high');
+
+  // Score display
+  var sv = document.getElementById('scoreValue');
+  sv.textContent = score;
+  sv.className = 'score-number';
+
+  // Risk banner
+  var banner = document.getElementById('riskBanner');
+  banner.className = 'risk-banner risk-' + level;
+  var svgIcons = {
+    low: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00c853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    moderate: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    high: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+  };
+  var iconKey = t['risk' + level.charAt(0).toUpperCase() + level.slice(1) + 'Icon'];
+  document.getElementById('riskIcon').innerHTML = svgIcons[iconKey] || svgIcons['low'];
+  document.getElementById('riskCategoryLabel').textContent = t['risk' + level.charAt(0).toUpperCase() + level.slice(1) + 'Label'];
+  document.getElementById('riskCategory').textContent = t['risk' + level.charAt(0).toUpperCase() + level.slice(1) + 'Description'];
+
+  // Recommendations
+  var recs = t['rec' + level.charAt(0).toUpperCase() + level.slice(1)] || [];
+  var recsEl = document.getElementById('recommendations');
+  recsEl.innerHTML = '';
+  recs.forEach(function(text) {
+    var div = document.createElement('div');
+    div.className = 'rec-item';
+    div.textContent = text;
+    recsEl.appendChild(div);
+  });
+
+  // Breakdown
+  var breakdownSection = document.getElementById('breakdownSection');
+  breakdownSection.style.display = 'block';
+  var breakdownGrid = document.getElementById('breakdownGrid');
+  breakdownGrid.innerHTML = '';
+  t.breakdownNames.forEach(function(name, i) {
+    var active = checks[i];
+    var div = document.createElement('div');
+    div.className = 'breakdown-item ' + (active ? 'active' : 'inactive');
+    div.innerHTML = '<span class="breakdown-name">' + name + '</span><span class="breakdown-pts ' + (active ? 'pts-active' : 'pts-inactive') + '">+' + pts[i] + '</span>';
+    breakdownGrid.appendChild(div);
+  });
+}
+
+function resetForm() {
+  ['ferritin', 'sua', 'cpb', 'vis', 'fluid', 'na'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var lcosEl = document.getElementById('lcos');
+  if (lcosEl) lcosEl.value = 'no';
+
+  var sv = document.getElementById('scoreValue');
+  sv.textContent = '–';
+  sv.className = 'score-number is-dash';
+
+  document.getElementById('riskBanner').className = 'risk-banner risk-none';
+  document.getElementById('riskIcon').innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7a9bbf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>';
+  document.getElementById('riskCategoryLabel').textContent = i18n[currentLang].waitingLabel;
+  document.getElementById('riskCategory').textContent = i18n[currentLang].riskIntro;
+
+  var t = i18n[currentLang];
+  var recsEl = document.getElementById('recommendations');
+  recsEl.innerHTML = [
+    ['●', t.defaultRec1], ['●', t.defaultRec2], ['●', t.defaultRec3]
+  ].map(function(r){
+    return '<div class="rec-item"><span class="rec-icon">' + r[0] + '</span><span>' + r[1] + '</span></div>';
+  }).join('');
+
+  document.getElementById('breakdownSection').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  applyLanguage('ru');
+  document.getElementById('calcBtn').addEventListener('click', calculateScore);
+  document.getElementById('resetBtn').addEventListener('click', resetForm);
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      applyLanguage(btn.getAttribute('data-lang'));
+      resetForm();
+    });
+  });
+});
+</script>
+</body>
+</html>
