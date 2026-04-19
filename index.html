@@ -775,7 +775,7 @@
           <div class="recs-title" id="clinicalTitle">Клиническая тактика</div>
           <div id="recommendations">
             <div class="rec-item"><span id="defaultRec1">Низкий риск (0–2): стандартное наблюдение, контроль креатинина.</span></div>
-            <div class="rec-item"><span id="defaultRec2">Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных.</span></div>
+            <div class="rec-item"><span id="defaultRec2">Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных препаратов.</span></div>
             <div class="rec-item"><span id="defaultRec3">Высокий риск (≥6): интенсивный мониторинг, коррекция гемодинамики, ЗПТ.</span></div>
           </div>
         </div>
@@ -828,8 +828,8 @@ var i18n = {
     ferritinName: 'Ферритин', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
     suaName: 'Мочевая кислота', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
     cpbName: 'Длительность ИК', cpbUnit: 'мин', helperCpb: '>90 мин → +1',
-    visName: 'VIS-score', visUnit: 'балл', helperVis: '>20 → +1',
-    lcosName: 'LCOS', lcosUnit: 'да/нет', lcosNo: 'Нет', lcosYes: 'Да', helperLcos: 'LCOS → +1',
+    visName: 'VIS-score (Vasoactive-Inotropic Score)', visUnit: 'балл', helperVis: '>20 → +1',
+    lcosName: 'LCOS (low cardiac output syndrome)', lcosUnit: 'да/нет', lcosNo: 'Нет', lcosYes: 'Да', helperLcos: 'LCOS → +1',
     fluidName: 'Водный баланс', fluidUnit: '% масс.', helperFluid: '>10% → +1',
     naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Пожалуйста, заполните все числовые поля перед расчётом.',
@@ -840,7 +840,7 @@ var i18n = {
     waitingLabel: 'Ожидание',
     clinicalTitle: 'Клиническая тактика', breakdownTitle: 'Разбивка по баллам',
     defaultRec1: 'Низкий риск (0–2): стандартное наблюдение, контроль креатинина.',
-    defaultRec2: 'Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных.',
+    defaultRec2: 'Умеренный риск (3–5): мониторинг диуреза, ограничение нефротоксичных препаратов.',
     defaultRec3: 'Высокий риск (≥6): интенсивный мониторинг, коррекция гемодинамики, ЗПТ.',
     legendTitle: 'Категории риска',
     legendLowBadge: '0–2 балла', legendLowText: 'Низкий риск. Стандартное послеоперационное наблюдение.',
@@ -871,8 +871,8 @@ var i18n = {
     ferritinName: 'Ferritin', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
     suaName: 'Serum uric acid', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
     cpbName: 'CPB duration', cpbUnit: 'min', helperCpb: '>90 min → +1',
-    visName: 'VIS-score', visUnit: 'score', helperVis: '>20 → +1',
-    lcosName: 'LCOS', lcosUnit: 'yes/no', lcosNo: 'No', lcosYes: 'Yes', helperLcos: 'LCOS → +1',
+    visName: 'VIS-score (Vasoactive-Inotropic Score)', visUnit: 'score', helperVis: '>20 → +1',
+    lcosName: 'LCOS (low cardiac output syndrome)', lcosUnit: 'yes/no', lcosNo: 'No', lcosYes: 'Yes', helperLcos: 'LCOS → +1',
     fluidName: 'Fluid balance', fluidUnit: '% BW', helperFluid: '>10% → +1',
     naName: 'Sodium (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Please fill in all numeric fields before calculating.',
@@ -904,7 +904,7 @@ var i18n = {
   },
   kk: {
     appTitle: 'Балалардағы CSA-AKI тәуекел стратификациясы',
-    appSubtitle: 'ТБЖ түзетуден кейінгі ОПП тәуекелінің көпмаркерлі калькуляторы',
+    appSubtitle: 'ТБЖ түзетуден кейінгі жедел бүйрек зақымдануы тәуекелінің көпмаркерлі калькуляторы',
     appBadge: 'CSA-AKI тәуекел скорингі',
     statLabel1: 'Зерттеудегі науқастар',
     statLabel2: 'Шкала параметрлері',
@@ -913,9 +913,9 @@ var i18n = {
     resultSectionTitle: 'Тәуекел стратификациясының нәтижесі',
     ferritinName: 'Ферритин', ferritinUnit: 'ng/mL', helperFerritin: '≥150 ng/mL → +2',
     suaName: 'Зәр қышқылы', suaUnit: 'µmol/L', helperSua: '≥500 µmol/L → +1',
-    cpbName: 'ЖҚ ұзақтығы', cpbUnit: 'мин', helperCpb: '>90 мин → +1',
-    visName: 'VIS-score', visUnit: 'балл', helperVis: '>20 → +1',
-    lcosName: 'LCOS', lcosUnit: 'иә/жоқ', lcosNo: 'Жоқ', lcosYes: 'Иә', helperLcos: 'LCOS → +1',
+    cpbName: 'жасанды қан айналым (ЖҚА) ұзақтығы', cpbUnit: 'мин', helperCpb: '>90 мин → +1',
+    visName: 'VIS-score (Vasoactive-Inotropic Score)', visUnit: 'балл', helperVis: '>20 → +1',
+    lcosName: 'LCOS (low cardiac output syndrome)', lcosUnit: 'иә/жоқ', lcosNo: 'Жоқ', lcosYes: 'Иә', helperLcos: 'LCOS → +1',
     fluidName: 'Сұйықтық балансы', fluidUnit: '% салмақ', helperFluid: '>10% → +1',
     naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Есептеу алдында барлық сандық өрістерді толтырыңыз.',
@@ -926,22 +926,22 @@ var i18n = {
     waitingLabel: 'Күту',
     clinicalTitle: 'Клиникалық тактика', breakdownTitle: 'Балл бөлінісі',
     defaultRec1: 'Төмен қауіп (0–2): стандартты бақылау, креатинин.',
-    defaultRec2: 'Орташа қауіп (3–5): диурез мониторингі, нефротоксикалық шектеу.',
-    defaultRec3: 'Жоғары қауіп (≥6): интенсивті мониторинг, гемодинамика, ЗАБ.',
+    defaultRec2: 'Орташа қауіп (3–5): диурез мониторингі, нефротоксикалық препараттарды шектеу.',
+    defaultRec3: 'Жоғары қауіп (≥6): интенсивті мониторинг, гемодинамика, БАТ.',
     legendTitle: 'Тәуекел санаттары',
     legendLowBadge: '0–2 балл', legendLowText: 'Төмен тәуекел. Стандартты операциядан кейінгі бақылау.',
     legendModerateBadge: '3–5 балл', legendModerateText: 'Орташа тәуекел. Мониторинг, нефропротекция.',
-    legendHighBadge: '≥6 балл', legendHighText: 'Жоғары тәуекел. Агрессивті шаралар, ерте ЗАБ.',
+    legendHighBadge: '≥6 балл', legendHighText: 'Жоғары тәуекел. Агрессивті шаралар, ерте БАТ.',
     footerLeft: 'Калькулятор балалардағы кардиохирургиялық операциядан кейінгі CSA-AKI моделіне негізделген.',
     footerRight: 'Офлайн жұмыс істейді',
     riskLowLabel: '● Төмен тәуекел', riskModerateLabel: '● Орташа тәуекел', riskHighLabel: '● Жоғары тәуекел',
     riskLowIcon: 'low', riskModerateIcon: 'moderate', riskHighIcon: 'high',
     riskLowDescription: 'Төмен тәуекел тобы (0–2 балл). Стандартты бақылау жеткілікті.',
     riskModerateDescription: 'Орташа тәуекел тобы (3–5 балл). Күшейтілген мониторинг, нефропротекция.',
-    riskHighDescription: 'Жоғары тәуекел тобы (≥6 балл). Интенсивті мониторинг, гемодинамиканы ерте коррекциялау, ЗАБ қарастыру.',
+    riskHighDescription: 'Жоғары тәуекел тобы (≥6 балл). Интенсивті мониторинг, гемодинамиканы ерте коррекциялау, БАТ қарастыру.',
     recLow: ['Стандартты операциядан кейінгі бақылау.', 'Зертханалық бүйрек функциясын тексеру.'],
     recModerate: ['Диурезді күшейтілген бақылау.', 'Нефротоксикалық дәрілерді шектеу.', 'Гемодинамика мен сұйықтық балансын оңтайландыру.'],
-    recHigh: ['Бүйрек функциясын интенсивті бақылау.', 'Гемодинамиканы ерте коррекциялау.', 'Ерте ЗАБ (перитонеальды диализ) мүмкіндігін қарастыру.'],
+    recHigh: ['Бүйрек функциясын интенсивті бақылау.', 'Гемодинамиканы ерте коррекциялау.', 'Ерте БАТ (бүйрек алмастырушы терапиясы) мүмкіндігін қарастыру.'],
     breakdownNames: ['Ферритин ≥150', 'Зәр қышқылы ≥500', 'ЖҚ >90 мин', 'VIS >20', 'LCOS', 'Сұйықтық >10%', 'Na <130'],
     breakdownPts: [2, 1, 1, 1, 1, 1, 1]
   }
