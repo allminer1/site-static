@@ -731,9 +731,12 @@
       <div id="error" class="error-msg">Пожалуйста, заполните все числовые поля перед расчётом.</div>
 
       <div class="actions">
-        <button id="calcBtn" type="button" class="btn-calc">
-          <span id="calcBtnText">⚡ Рассчитать риск</span>
-        </button>
+        <button id="calcBtn" type="button" class="btn-calc" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+  </svg>
+  <span id="calcBtnText"></span>
+</button>
         <button id="resetBtn" type="button" class="btn-reset">
           <span id="resetBtnText">↺ Сброс</span>
         </button>
@@ -833,7 +836,7 @@ var i18n = {
     fluidName: 'Водный баланс', fluidUnit: '% масс.', helperFluid: '>10% → +1',
     naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Пожалуйста, заполните все числовые поля перед расчётом.',
-    calcBtnText: '⚡ Рассчитать риск', resetBtnText: '↺ Сброс',
+    calcBtnText: 'Рассчитать риск', resetBtnText: '↺ Сброс',
     cutoffInfo: 'Пороговые значения: ферритин ≥150 ng/mL · SUA ≥500 µmol/L · ИК >90 мин · VIS >20 · водный баланс >10% · Na <130 mmol/L',
     scoreLineLabel: 'Суммарный балл', scoreMax: 'из 8 возможных',
     riskIntro: 'Введите параметры и нажмите «Рассчитать риск».',
@@ -876,7 +879,7 @@ var i18n = {
     fluidName: 'Fluid balance', fluidUnit: '% BW', helperFluid: '>10% → +1',
     naName: 'Sodium (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Please fill in all numeric fields before calculating.',
-    calcBtnText: '⚡ Calculate risk', resetBtnText: '↺ Reset',
+    calcBtnText: 'Calculate risk', resetBtnText: '↺ Reset',
     cutoffInfo: 'Cut-offs: ferritin ≥150 ng/mL · SUA ≥500 µmol/L · CPB >90 min · VIS >20 · fluid balance >10% BW · Na <130 mmol/L',
     scoreLineLabel: 'Total score', scoreMax: 'out of 8 possible',
     riskIntro: 'Enter parameters and press "Calculate risk".',
@@ -919,7 +922,7 @@ var i18n = {
     fluidName: 'Сұйықтық балансы', fluidUnit: '% салмақ', helperFluid: '>10% → +1',
     naName: 'Натрий (Na)', naUnit: 'mmol/L', helperNa: '<130 mmol/L → +1',
     errorFillAll: 'Есептеу алдында барлық сандық өрістерді толтырыңыз.',
-    calcBtnText: '⚡ Қауіпті есептеу', resetBtnText: '↺ Тазалау',
+    calcBtnText: 'Қауіпті есептеу', resetBtnText: '↺ Тазалау',
     cutoffInfo: 'Порогтық мәндер: ферритин ≥150 ng/mL · зәр қышқылы ≥500 µmol/L · ЖҚ >90 мин · VIS >20 · сұйықтық балансы >10% · Na <130 mmol/L',
     scoreLineLabel: 'Жалпы балл', scoreMax: '8 мүмкіннің ішінен',
     riskIntro: 'Параметрлерді енгізіп, «Қауіпті есептеу» батырмасын басыңыз.',
